@@ -1,3 +1,5 @@
+#!/usr/bin/env python2.7
+
 import requests
 #from urlparse import urljoin
 from future.standard_library import install_aliases
