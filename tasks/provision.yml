@@ -2,6 +2,7 @@
   assert:
     that: "{{ item }} is defined"
   with_items:
+    - mr_provisioner_machine_name
     - mr_provisioner_kernel_description
     - mr_provisioner_initrd_description
     - mr_provisioner_kernel_path
@@ -39,7 +40,7 @@
 
 - name: Provision machine
   mr_provisioner_machine_provision:
-    machine_name: "{{ inventory_hostname }}"
+    machine_name: "{{ mr_provisioner_machine_name }}"
     kernel_description: "{{ mr_provisioner_kernel_description }}"
     initrd_description: "{{ mr_provisioner_initrd_description }}"
     arch: "{{ mr_provisioner_arch }}"
