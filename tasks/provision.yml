@@ -38,6 +38,20 @@
   register: initrd_image
 - debug: var=initrd_image
 
+- name: Upload Preseed
+  preseed_upload_module:
+          preseed_name: "{{ mr_provisioner_preseed_name }}"
+          preseed_file: "{{ mr_provisioner_preseed_path }}"
+          preseed_type: "{{ mr_provisioner_preseed_type }}"
+          preseed_description: "{{ mr_provisioner_preseed_description|default('') }}"
+          preseed_bknowngood: "{{ mr_provisioner_preseed_knowngood|default(False) }}"
+          preseed_bpublic: "{{ mr_provisioner_preseed_public|default(False) }}"
+          mrp_url: "{{ mr_provisioner_url }}"
+          mrp_token: "{{ mr_provisioner_auth_token }}"
+  run_once: true
+  register: preseed_image
+- debug: var=initrd_image
+
 - name: Provision machine
   mr_provisioner_machine_provision:
     machine_name: "{{ mr_provisioner_machine_name }}"
