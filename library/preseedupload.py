@@ -3,7 +3,10 @@
 import requests
 import json
 from urllib.parse import urljoin
-from mr_provisioner_machine_provision import ProvisionerError
+
+class ProvisionerError(Exception):
+    def __init__(self, message):
+        super(ProvisionerError, self).__init__(message)
 
 class PreseedUploader(object):
     """ This class handles the job of uploading a preseed file to MrP.
