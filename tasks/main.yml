@@ -6,4 +6,4 @@
   wait_for_connection:
     delay: 60
     timeout: 3600
-  when: mr_provisioner_do_provision
+  when: mr_provisioner_do_provision and inventory_hostname in groups['target']

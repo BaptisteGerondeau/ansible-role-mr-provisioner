@@ -39,7 +39,7 @@
 - debug: var=initrd_image
 
 - name: Upload Preseed
-  preseed_upload_module:
+  mr_provisioner_preseed_upload_module:
           preseed_name: "{{ mr_provisioner_preseed_name }}"
           preseed_file: "{{ mr_provisioner_preseed_path }}"
           preseed_type: "{{ mr_provisioner_preseed_type }}"
@@ -65,3 +65,17 @@
     token: "{{ mr_provisioner_auth_token }}"
   register: provision_machine
 - debug: var=provision_machine
+
+- name: Get IP of provisioned machine
+  mr_provisioner_get_ip:
+    url: "{{ mr_provisioner_url }}"
+    token: "{{ mr_provisioner_auth_token }}"
+    machine_name: "{{ mr_provisioner_machine_name }}"
+    interface_name: "{{ mr_provisioner_interface_name|default('eth1') }}"
+  register: get_ip
+
+- name: Add provisioned machine as host
+  add_host:
+          name: get_ip.results['ip']
+          groups: target
+  when: get_ip.results is defined
