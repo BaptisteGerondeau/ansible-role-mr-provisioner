@@ -68,7 +68,7 @@ try:
     from urllib.parse import urlparse
 except ImportError:
      from urlparse import urlparse
-from urllibparse import urljoin
+from urlparse import urljoin
 from ansible.module_utils.basic import AnsibleModule
 
 class ProvisionerError(Exception):
