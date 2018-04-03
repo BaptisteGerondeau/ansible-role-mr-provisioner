@@ -68,8 +68,8 @@
 
 - name: Get IP of provisioned machine
   mr_provisioner_get_ip:
-    url: "{{ mr_provisioner_url }}"
-    token: "{{ mr_provisioner_auth_token }}"
+    mrp_url: "{{ mr_provisioner_url }}"
+    mrp_token: "{{ mr_provisioner_auth_token }}"
     machine_name: "{{ mr_provisioner_machine_name }}"
     interface_name: "{{ mr_provisioner_interface_name|default('eth1') }}"
   register: get_ip
