@@ -99,7 +99,7 @@ def machine_provision(url, token, machine_id):
 
 
 def set_machine_parameters(url, token, machine_id, initrd_id=None,
-                           kernel_id=None, preseed_id=None, subarch=None):
+                           kernel_id=None, kernel_opts = None, preseed_id=None, subarch=None):
     """ Set parameters on machine specified by machine_id """
     headers = {'Authorization': token}
     url = urljoin(url, "/api/v1/machine/{}".format(machine_id))
@@ -113,8 +113,11 @@ def set_machine_parameters(url, token, machine_id, initrd_id=None,
         parameters['preseed_id'] = preseed_id
     if subarch:
         parameters['subarch'] = subarch
+    if kernel_opts:
+        parameters['kernel_opts'] = kernel_opts
+    else:
+        parameters['kernel_opts'] = ""
     parameters['netboot_enabled'] = True
-    parameters['kernel_opts'] = ""
 
     data = json.dumps(parameters)
 
@@ -247,6 +250,7 @@ def run_module():
                                       machine_id=machine['id'],
                                       initrd_id=initrd_id['id'],
                                       kernel_id=kernel_id['id'],
+                                      kernel_opts=module.params['kernel_options'],
                                       preseed_id=preseed['id'],
                                       subarch=module.params['subarch'])
 
