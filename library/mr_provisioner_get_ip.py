@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python2.7
 # -*- coding: utf-8 -*-
 
 ANSIBLE_METADATA = {
@@ -82,41 +82,15 @@ class ProvisionerError(Exception):
         super(ProvisionerError, self).__init__(message)
 
 class IPGetter(object):
-    def __init__(self, mrpurl, mrptoken, machine_name, interface_name =
+    def __init__(self, mrpurl, mrptoken, machine_id, interface_name =
                  'eth1'):
         self.mrp_url = mrpurl
         self.mrp_token = mrptoken
-        self.machine_name = machine_name
         self.interface = interface_name
-        self.machine_id = -1
-        self.machine_ip = self.get_ip()
-
-    def get_machine_by_name(self):
-        """ Look up machine by name """
-        headers = {'Authorization': self.mrp_token}
-        q = '(= name "{}")'.format(quote(self.machine_name))
-        url = urljoin(self.mrp_url, "/api/v1/machine?q={}&show_all=false".format(q))
-        r = requests.get(url, headers=headers)
-        if r.status_code != 200:
-            raise ProvisionerError('Error fetching {}, HTTP {} {}'.format(url,
-                             r.status_code, r.reason))
-        if len(r.json()) == 0:
-            raise ProvisionerError('Error no assigned machine found with name "{}"'.
-                    format(self.machine_name))
-        if len(r.json()) > 1:
-            raise ProvisionerError('Error more than one machine found with name "{}", {}'.
-                    format(self.machine_name, r.json()))
-        return r.json()[0]
+        self.machine_id = machine_id
+        self.machine_ip = ''
 
     def get_interfaces(self):
-        try:
-            res = self.get_machine_by_name()
-        except ProvisionerError as prov:
-            raise prov
-        if res['id']:
-            self.machine_id = res['id']
-        else:
-            raise ProvisionerError("No ID found for machine {}".format(self.machine_name))
         headers = {'Authorization': self.mrp_token}
         url = urljoin(self.mrp_url,
                       "/api/v1/machine/{}/interface".format(self.machine_id))
@@ -127,20 +101,38 @@ class IPGetter(object):
         if len(r.json()) == 0:
             raise ProvisionerError('Error no machine with id "{}"'.format(self.machine_id))
 
-        return r
+        return r.json()
 
     def get_ip(self):
         try:
             interfaces = self.get_interfaces()
         except ProvisionerError as e:
             print('Could not fetch interface for machine : "{}"'.format(e))
+            return 'FAILURE'
 
         for i in interfaces:
-            if i['identifier'] == self.interface:
-                if i['config_type_v4'] == 'dynamic-reserved' and i['configured_ipv4']:
+            if str(i['identifier']) == self.interface:
+                if str(i['config_type_v4']) == 'dynamic-reserved' and str(i['configured_ipv4']):
                     return i['configured_ipv4']
                 else:
                     return i['lease_ipv4']
+
+def get_machine_by_name(mrp_token, mrp_url, machine_name):
+    """ Look up machine by name """
+    headers = {'Authorization': mrp_token}
+    q = '(= name "{}")'.format(quote(machine_name))
+    url = urljoin(mrp_url, "/api/v1/machine?q={}&show_all=false".format(q))
+    r = requests.get(url, headers=headers)
+    if r.status_code != 200:
+        raise ProvisionerError('Error fetching {}, HTTP {} {}'.format(mrp_url,
+                         r.status_code, r.reason))
+    if len(r.json()) == 0:
+       raise ProvisionerError('Error no assigned machine found with name "{}"'.
+                    format(machine_name))
+    if len(r.json()) > 1:
+       raise ProvisionerError('Error more than one machine found with name "{}", {}'.
+                    format(machine_name, r.json()))
+    return r.json()[0]
 
 def run_module():
     module_args = dict(
@@ -163,22 +155,28 @@ def run_module():
     if module.check_mode:
         return result
 
-    if module_args['interface_name']:
-        ipgetter = IPGetter(module_args['mrp_url'], module_args['mrp_token'],
-                            module_args['machine_name'],
-                            module_args['interface_name'])
-    else:
-        ipgetter = IPGetter(module_args['mrp_url'], module_args['mrp_token'],
-                            module_args['machine_name'])
+    machine_id = get_machine_by_name(module.params['mrp_token'],
+                                     module.params['mrp_url'],
+                                     module.params['machine_name'])['id']
 
-    if ipgetter.machine_ip:
-        result['ip'] = ipgetter.machine_ip
+    if module.params['interface_name']:
+        ipgetter = IPGetter(module.params['mrp_url'], module.params['mrp_token'],
+                            machine_id,
+                            module.params['interface_name'])
+    else:
+        ipgetter = IPGetter(module.params['mrp_url'], module.params['mrp_token'],
+                            machine_id)
+    try:
+        machine_ip = str(ipgetter.get_ip())
+    except ProvisionerError as e:
+        print('Could not get IP error : "{}"'.format(e))
+
+    if machine_ip:
+        result['ip'] = machine_ip
         result['json'] = { 'status': 'ok' }
         result['changed'] = True
     else:
-        print('No IP got...')
-        result['json'] = { 'status': 'false' }
-        result['changed'] = False
+        module.fail_json(msg='Failure to fetch IP from MrP', **result)
 
     module.exit_json(**result)
 

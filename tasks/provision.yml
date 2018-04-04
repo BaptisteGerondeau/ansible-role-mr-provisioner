@@ -50,7 +50,7 @@
           mrp_token: "{{ mr_provisioner_auth_token }}"
   run_once: true
   register: preseed_image
-- debug: var=initrd_image
+- debug: var=preseed_image
 
 - name: Provision machine
   mr_provisioner_machine_provision:
@@ -73,9 +73,10 @@
     machine_name: "{{ mr_provisioner_machine_name }}"
     interface_name: "{{ mr_provisioner_interface_name|default('eth1') }}"
   register: get_ip
+- debug: var=get_ip
 
 - name: Add provisioned machine as host
   add_host:
-          name: get_ip.results['ip']
+          name: "{{ get_ip['ip'] }}"
           groups: target
-  when: get_ip.results is defined
+  when: get_ip['ip'] is defined
