@@ -133,7 +133,7 @@ r.status_code, r.reason))
         except ProvisionerError as err:
             print(str(err))
 
-        if(self.id != -1):
+        if(self.id != -1 and self.file != '/dev/null'):
             self._modify_preseed()
         else:
             preseed = self._get_preseed_from_file()
