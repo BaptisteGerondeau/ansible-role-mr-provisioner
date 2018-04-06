@@ -135,7 +135,7 @@ r.status_code, r.reason))
 
         if(self.id != -1 and self.file != '/dev/null'):
             self._modify_preseed()
-        else if (self.file != '/dev/null'):
+        elif (self.file != '/dev/null'):
             preseed = self._get_preseed_from_file()
             url = urljoin(self.url, '/api/v1/preseed')
             r = requests.post(url,
