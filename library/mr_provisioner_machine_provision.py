@@ -6,8 +6,15 @@ import requests
 from future.standard_library import install_aliases
 install_aliases()
 
-from urllib.parse import urljoin
-from urllib import quote
+try:
+    from urlparse import urljoin    #Python2
+except ImportError:
+    from urllib.parse import urljoin    #Python3
+
+try:
+    from urllib import quote
+except ImportError:
+    from urllib.parse import quote
 
 ANSIBLE_METADATA = {
     'metadata_version': '1.1',
