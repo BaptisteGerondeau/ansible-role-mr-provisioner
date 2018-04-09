@@ -79,4 +79,5 @@
   add_host:
           name: "{{ get_ip['ip'] }}"
           groups: target
+          ansible_user: root
   when: get_ip['ip'] is defined
