@@ -80,5 +80,5 @@
           name: "{{ get_ip['ip'] }}"
           groups: target
           ansible_user: root
-          ansible_ssh_extra_args: '-o StrictHostKeyChecking=no UserKnownHostsFile=/dev/null'
+          ansible_ssh_extra_args: '-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
   when: get_ip['ip'] is defined
