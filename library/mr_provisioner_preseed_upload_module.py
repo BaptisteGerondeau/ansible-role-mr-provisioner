@@ -133,9 +133,9 @@ r.status_code, r.reason))
         except ProvisionerError as err:
             print(str(err))
 
-        if(self.id != -1 and self.file != '/dev/null'):
+        if(self.id != -1 and self.file != ''):
             self._modify_preseed()
-        elif (self.file != '/dev/null'):
+        elif (self.file != ''):
             preseed = self._get_preseed_from_file()
             url = urljoin(self.url, '/api/v1/preseed')
             r = requests.post(url,
