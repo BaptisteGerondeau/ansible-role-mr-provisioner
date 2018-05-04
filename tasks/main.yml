@@ -2,6 +2,15 @@
   when: mr_provisioner_do_provision
   delegate_to: localhost
 
+- name: Turn the netboot flag off with timeout
+  mr_provisioner_netboot_switch:
+     timeout: "{{ mr_provisioner_switch_netboot_timeout | default('600') }}"
+     name: "{{ mr_provisioner_machine_name }}"
+     url: "{{ mr_provisioner_url }}"
+     token: "{{ mr_provisioner_auth_token }}"
+  delegate_to: localhost
+  when: mr_provisioner_turn_off_netboot 
+
 - name: Wait for host for 3600 seconds, but only start checking after 60 seconds
   wait_for_connection:
     delay: 60

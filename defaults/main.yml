@@ -4,3 +4,8 @@
 # Disable mr_provisioner_do_provision to skip the tasks
 # and just use the included modules
 mr_provisioner_do_provision: True
+
+# For certain machines, the netboot flag does need to be turned
+# off after provisioning to keep them from being caught in a PXE
+# provisioning loop.
+mr_provisioner_turn_off_netboot: False
